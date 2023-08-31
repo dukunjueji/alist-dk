@@ -165,7 +165,7 @@ func GetOpenDwnUrl(ctx context.Context, FileRes CopyFileRes) (*model.Link, error
 
 func CopyFile(file model.Obj, d *AliyundriveShare) (CopyFileRes, *model.Link) {
 	var FileRes CopyFileRes
-	fmt.Println("https://api.aliyundrive.com/adrive/v2/batch 复制文件 start:", file.GetID()+"UserDriveId"+d.UserDriveId)
+	log.Debugf("https://api.aliyundrive.com/adrive/v2/batch 复制文件 start:%s", file.GetID()+"UserDriveId"+d.UserDriveId)
 	_, err := d.request("https://api.aliyundrive.com/adrive/v2/batch", http.MethodPost, func(req *resty.Request) {
 		req.SetHeader(CanaryHeaderKey, CanaryHeaderValue).
 			SetBody(base.Json{
@@ -215,7 +215,7 @@ func DeleteFile(d *AliyundriveShare, FileRes CopyFileRes) {
 				"resource": "file",
 			}).SetResult(&FileRes)
 	})
-	fmt.Println("https://api.aliyundrive.com/adrive/v2/batch 删除文件 结束:", FileRes)
+	log.Debugf("https://api.aliyundrive.com/adrive/v2/batch 删除文件 结束:%s", FileRes)
 }
 
 func (d *AliyundriveShare) Other(ctx context.Context, args model.OtherArgs) (interface{}, error) {
