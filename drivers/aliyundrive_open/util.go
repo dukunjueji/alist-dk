@@ -109,6 +109,8 @@ func (d *AliyundriveOpen) requestReturnErrResp(uri, method string, callback base
 	}
 	var e ErrResp
 	req.SetError(&e)
+	log.Debugf("request requestReturnErrResp Body:%s", req.Body)
+	log.Debugf("request requestReturnErrResp Header:%s", req.Header)
 	res, err := req.Execute(method, d.base+uri)
 	if err != nil {
 		if res != nil {

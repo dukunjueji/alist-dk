@@ -34,7 +34,9 @@ func (d *AliyundriveOpen) Config() driver.Config {
 func (d *AliyundriveOpen) GetAddition() driver.Additional {
 	return &d.Addition
 }
-
+func (d *AliyundriveOpen) GetDriveId() string {
+	return d.DriveId
+}
 func (d *AliyundriveOpen) Init(ctx context.Context) error {
 	if d.LIVPDownloadFormat == "" {
 		d.LIVPDownloadFormat = "jpeg"

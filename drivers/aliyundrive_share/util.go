@@ -69,10 +69,14 @@ func (d *AliyundriveShare) request(url, method string, callback base.ReqCallback
 	if callback != nil {
 		callback(req)
 	} else {
+		log.Debugf("request url:%s", url)
 		req.SetBody("{}")
 	}
+	log.Debugf("request Body:%s", req.Body)
+	log.Debugf("request Header:%s", req.Header)
 	resp, err := req.Execute(method, url)
 	if err != nil {
+		log.Debugf("request error:%s", err)
 		return nil, err
 	}
 	if e.Code != "" {

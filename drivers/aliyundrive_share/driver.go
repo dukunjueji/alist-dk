@@ -3,18 +3,18 @@ package aliyundrive_share
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/Xhofe/rateg"
 	"github.com/alist-org/alist/v3/drivers/base"
 	"github.com/alist-org/alist/v3/internal/driver"
 	"github.com/alist-org/alist/v3/internal/errs"
 	"github.com/alist-org/alist/v3/internal/model"
+	"github.com/alist-org/alist/v3/internal/op"
 	"github.com/alist-org/alist/v3/pkg/cron"
 	"github.com/alist-org/alist/v3/pkg/utils"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
+	"net/http"
+	"time"
 )
 
 type AliyundriveShare struct {
@@ -23,10 +23,16 @@ type AliyundriveShare struct {
 	AccessToken string
 	ShareToken  string
 	DriveId     string
+	UserDriveId string
 	cron        *cron.Cron
 
 	limitList func(ctx context.Context, dir model.Obj) ([]model.Obj, error)
 	limitLink func(ctx context.Context, file model.Obj) (*model.Link, error)
+}
+
+func (d *AliyundriveShare) GetDriveId() string {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (d *AliyundriveShare) Config() driver.Config {
@@ -61,6 +67,12 @@ func (d *AliyundriveShare) Init(ctx context.Context) error {
 		Limit:  1,
 		Bucket: 1,
 	})
+	var res User
+	_, _ = d.request("https://api.aliyundrive.com/v2/user/get", http.MethodPost, func(req *resty.Request) {
+		req.SetBody(base.Json{}).SetResult(&res)
+	})
+	d.UserDriveId = res.DriveId
+	// Unmarshal JSON data into Json (map[string]interface{})
 	return nil
 }
 
@@ -97,26 +109,105 @@ func (d *AliyundriveShare) Link(ctx context.Context, file model.Obj, args model.
 }
 
 func (d *AliyundriveShare) link(ctx context.Context, file model.Obj) (*model.Link, error) {
-	data := base.Json{
-		"drive_id": d.DriveId,
-		"file_id":  file.GetID(),
-		// // Only ten minutes lifetime
-		"expire_sec": 600,
-		"share_id":   d.ShareId,
-	}
-	var resp ShareLinkResp
-	_, err := d.request("https://api.aliyundrive.com/v2/file/get_share_link_download_url", http.MethodPost, func(req *resty.Request) {
-		req.SetHeader(CanaryHeaderKey, CanaryHeaderValue).SetBody(data).SetResult(&resp)
-	})
-	if err != nil {
-		return nil, err
-	}
+	//data := base.Json{
+	//	"category":          "live_transcoding",
+	//	"get_preview_url":   true,
+	//	"get_subtitle_info": true,
+	//	"template_id":       "",
+	//	"file_id":           file.GetID(),
+	//	// // Only ten minutes lifetime
+	//	"share_id": d.ShareId,
+	//}
+	FileRes, _ := CopyFile(file, d)
+
+	link, err := GetOpenDwnUrl(ctx, FileRes)
+
+	log.Debugf("link:%s,err%s", link.URL, err)
+
+	DeleteFile(d, FileRes)
+
 	return &model.Link{
 		Header: http.Header{
 			"Referer": []string{"https://www.aliyundrive.com/"},
 		},
-		URL: resp.DownloadUrl,
+		URL: link.URL,
 	}, nil
+}
+
+func GetOpenDwnUrl(ctx context.Context, FileRes CopyFileRes) (*model.Link, error) {
+	storageAilYunOpen, _, _ := op.GetStorageAndActualPath("/root")
+	var rootObj model.Obj
+	rootObj = &model.Object{
+		ID:       FileRes.Responses[0].Body.FileID,
+		Name:     FileRes.Responses[0].Body.FileID,
+		Size:     0,
+		IsFolder: true,
+	}
+	linkArgs := model.LinkArgs{
+		IP:     "your_ip_address",
+		Header: http.Header{"Authorization": []string{"Bearer your_token"}},
+		Type:   "application/json",
+		HttpReq: &http.Request{
+			Method: "GET",
+			// Initialize other fields of the http.Request if needed
+		},
+	}
+	link, err1 := storageAilYunOpen.Link(ctx, rootObj, linkArgs)
+	return link, err1
+}
+
+func CopyFile(file model.Obj, d *AliyundriveShare) (CopyFileRes, *model.Link) {
+	var FileRes CopyFileRes
+	fmt.Println("https://api.aliyundrive.com/adrive/v2/batch  start:", file.GetID()+d.UserDriveId)
+	_, err := d.request("https://api.aliyundrive.com/adrive/v2/batch", http.MethodPost, func(req *resty.Request) {
+		req.SetHeader(CanaryHeaderKey, CanaryHeaderValue).
+			SetBody(base.Json{
+				"requests": []base.Json{
+					{
+						"headers": base.Json{
+							"Content-Type": "application/json",
+						},
+						"method": "POST",
+						"id":     0,
+						"body": base.Json{
+							"file_id":           file.GetID(),
+							"share_id":          d.ShareId,
+							"to_drive_id":       d.UserDriveId,
+							"to_parent_file_id": "root",
+						},
+						"url": "/file/copy",
+					},
+				},
+				"resource": "file",
+			}).SetResult(&FileRes)
+	})
+	if err != nil {
+		return CopyFileRes{}, nil
+	}
+	return FileRes, nil
+}
+
+func DeleteFile(d *AliyundriveShare, FileRes CopyFileRes) {
+	_, _ = d.request("https://api.aliyundrive.com/adrive/v2/batch", http.MethodPost, func(req *resty.Request) {
+		req.SetHeader(CanaryHeaderKey, CanaryHeaderValue).
+			SetBody(base.Json{
+				"requests": []base.Json{
+					{
+						"headers": base.Json{
+							"Content-Type": "application/json",
+						},
+						"method": "POST",
+						"id":     FileRes.Responses[0].Body.FileID,
+						"body": base.Json{
+							"file_id":  FileRes.Responses[0].Body.FileID,
+							"drive_id": d.UserDriveId,
+						},
+						"url": "/file/delete",
+					},
+				},
+				"resource": "file",
+			}).SetResult(&FileRes)
+	})
 }
 
 func (d *AliyundriveShare) Other(ctx context.Context, args model.OtherArgs) (interface{}, error) {
