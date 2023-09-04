@@ -109,40 +109,63 @@ func (d *AliyundriveShare) Link(ctx context.Context, file model.Obj, args model.
 }
 
 func (d *AliyundriveShare) link(ctx context.Context, file model.Obj) (*model.Link, error) {
-	//data := base.Json{
-	//	"category":          "live_transcoding",
-	//	"get_preview_url":   true,
-	//	"get_subtitle_info": true,
-	//	"template_id":       "",
-	//	"file_id":           file.GetID(),
-	//	// // Only ten minutes lifetime
-	//	"share_id": d.ShareId,
-	//}
-	FileRes, _ := CopyFile(file, d)
 
-	link, err := GetOpenDwnUrl(ctx, FileRes)
+	var dwnUrl string
 
-	log.Debugf("link:%s,err%s", link.URL, err)
+	var storageAilYunOpen driver.Driver
+	storages := op.GetAllStorages()
+	for _, storage := range storages {
+		if storage.GetStorage().Driver == "AliyundriveOpen" {
+			log.Debugf("aliOpen start storage.GetStorage().Disabled :%s", storage.GetStorage().Disabled)
+			if !storage.GetStorage().Disabled {
+				storageAilYunOpen = storage
+			}
+			break
+		}
+	}
+	log.Debugf("aliOpen start storageAilYunOpen :%s", storageAilYunOpen)
+	if storageAilYunOpen != nil {
+		log.Debugf("aliOpen start storageAilYunOpen != nil :%s", storageAilYunOpen)
+		FileRes, _ := CopyFile(file, d)
 
-	DeleteFile(d, FileRes)
+		link, err := GetOpenDwnUrl(storageAilYunOpen, ctx, FileRes)
+
+		log.Debugf("link:%s,err%s", link.URL, err)
+
+		DeleteFile(d, FileRes)
+
+		dwnUrl = link.URL
+
+	} else {
+		log.Debugf("alishare start:%s", file.GetID()+"UserDriveId"+d.UserDriveId)
+		data := base.Json{
+			"drive_id": d.DriveId,
+			"file_id":  file.GetID(),
+			// // Only ten minutes lifetime
+			"expire_sec": 600,
+			"share_id":   d.ShareId,
+		}
+		var resp ShareLinkResp
+		_, err := d.request("https://api.aliyundrive.com/v2/file/get_share_link_download_url", http.MethodPost, func(req *resty.Request) {
+			req.SetHeader(CanaryHeaderKey, CanaryHeaderValue).SetBody(data).SetResult(&resp)
+		})
+		if err != nil {
+			return nil, err
+		}
+		dwnUrl = resp.DownloadUrl
+		log.Debugf("alishare end dwnUrl:%s", dwnUrl)
+	}
 
 	return &model.Link{
 		Header: http.Header{
 			"Referer": []string{"https://www.aliyundrive.com/"},
 		},
-		URL: link.URL,
+		URL: dwnUrl,
 	}, nil
 }
 
-func GetOpenDwnUrl(ctx context.Context, FileRes CopyFileRes) (*model.Link, error) {
-	var storageAilYunOpen driver.Driver
-	storages := op.GetAllStorages()
-	for _, storage := range storages {
-		if storage.GetStorage().Driver == "AliyundriveOpen" {
-			storageAilYunOpen = storage
-			break
-		}
-	}
+func GetOpenDwnUrl(storageAilYunOpen driver.Driver, ctx context.Context, FileRes CopyFileRes) (*model.Link, error) {
+
 	var rootObj model.Obj
 	rootObj = &model.Object{
 		ID:       FileRes.Responses[0].Body.FileID,
