@@ -112,21 +112,12 @@ func (d *AliyundriveShare) link(ctx context.Context, file model.Obj) (*model.Lin
 
 	var dwnUrl string
 
-	var storageAilYunOpen driver.Driver
-	storages := op.GetAllStorages()
-	for _, storage := range storages {
-		if storage.GetStorage().Driver == "AliyundriveOpen" {
-			log.Debugf("aliOpen start storage.GetStorage().Disabled :%s", storage.GetStorage().Disabled)
-			if !storage.GetStorage().Disabled {
-				storageAilYunOpen = storage
-			}
-			break
-		}
-	}
+	storageAilYunOpen := getStorageAilYunOpen()
+
 	log.Debugf("aliOpen start storageAilYunOpen :%s", storageAilYunOpen)
 	if storageAilYunOpen != nil {
 		log.Debugf("aliOpen start storageAilYunOpen != nil :%s", storageAilYunOpen)
-		FileRes, _ := CopyFile(file, d)
+		FileRes, _ := CopyFile(file.GetID(), d)
 
 		link, err := GetOpenDwnUrl(storageAilYunOpen, ctx, FileRes)
 
@@ -164,6 +155,21 @@ func (d *AliyundriveShare) link(ctx context.Context, file model.Obj) (*model.Lin
 	}, nil
 }
 
+func getStorageAilYunOpen() driver.Driver {
+	var storageAilYunOpen driver.Driver
+	storages := op.GetAllStorages()
+	for _, storage := range storages {
+		if storage.GetStorage().Driver == "AliyundriveOpen" {
+			log.Debugf("aliOpen start storage.GetStorage().Disabled :%s", storage.GetStorage().Disabled)
+			if !storage.GetStorage().Disabled {
+				storageAilYunOpen = storage
+			}
+			break
+		}
+	}
+	return storageAilYunOpen
+}
+
 func GetOpenDwnUrl(storageAilYunOpen driver.Driver, ctx context.Context, FileRes CopyFileRes) (*model.Link, error) {
 
 	var rootObj model.Obj
@@ -186,9 +192,9 @@ func GetOpenDwnUrl(storageAilYunOpen driver.Driver, ctx context.Context, FileRes
 	return link, err1
 }
 
-func CopyFile(file model.Obj, d *AliyundriveShare) (CopyFileRes, *model.Link) {
+func CopyFile(fileId string, d *AliyundriveShare) (CopyFileRes, *model.Link) {
 	var FileRes CopyFileRes
-	log.Debugf("https://api.aliyundrive.com/adrive/v2/batch 复制文件 start:%s", file.GetID()+"UserDriveId"+d.UserDriveId)
+	log.Debugf("https://api.aliyundrive.com/adrive/v2/batch 复制文件 start:%s", fileId+"UserDriveId"+d.UserDriveId)
 	_, err := d.request("https://api.aliyundrive.com/adrive/v2/batch", http.MethodPost, func(req *resty.Request) {
 		req.SetHeader(CanaryHeaderKey, CanaryHeaderValue).
 			SetBody(base.Json{
@@ -200,7 +206,7 @@ func CopyFile(file model.Obj, d *AliyundriveShare) (CopyFileRes, *model.Link) {
 						"method": "POST",
 						"id":     0,
 						"body": base.Json{
-							"file_id":           file.GetID(),
+							"file_id":           fileId,
 							"share_id":          d.ShareId,
 							"to_drive_id":       d.UserDriveId,
 							"to_parent_file_id": "root",
@@ -242,28 +248,62 @@ func DeleteFile(d *AliyundriveShare, FileRes CopyFileRes) {
 }
 
 func (d *AliyundriveShare) Other(ctx context.Context, args model.OtherArgs) (interface{}, error) {
-	var resp base.Json
-	var url string
-	data := base.Json{
-		"share_id": d.ShareId,
-		"file_id":  args.Obj.GetID(),
+	storageAilYunOpen := getStorageAilYunOpen()
+
+	FileRes, err := CopyFile(args.Obj.GetID(), d)
+
+	log.Debugf("FileRes:%s,err%s", FileRes, err)
+
+	var rootObj model.Obj
+	rootObj = &model.Object{
+		ID: FileRes.Responses[0].Body.FileID,
 	}
-	switch args.Method {
-	case "doc_preview":
-		url = "https://api.aliyundrive.com/v2/file/get_office_preview_url"
-	case "video_preview":
-		url = "https://api.aliyundrive.com/v2/file/get_video_preview_play_info"
-		data["category"] = "live_transcoding"
-	default:
-		return nil, errs.NotSupport
+	//var OtherArgs = model.OtherArgs{
+	//	Obj:    rootObj,
+	//	Method: "video_preview",
+	//}
+
+	if o, ok := storageAilYunOpen.(driver.Other); ok {
+		res, err := o.Other(ctx, model.OtherArgs{
+			Obj:    rootObj,
+			Method: args.Method,
+			Data:   args.Data,
+		})
+
+		DeleteFile(d, FileRes)
+
+		if err != nil {
+			return nil, err
+		}
+		return res, err
+	} else {
+		return nil, errs.NotImplement
 	}
-	_, err := d.request(url, http.MethodPost, func(req *resty.Request) {
-		req.SetBody(data).SetResult(&resp)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+
+	//return storageAilYunOpen.Other(ctx, OtherArgs)
+
+	//var resp base.Json
+	//var url string
+	//data := base.Json{
+	//	"share_id": d.ShareId,
+	//	"file_id":  args.Obj.GetID(),
+	//}
+	//switch args.Method {
+	//case "doc_preview":
+	//	url = "https://api.aliyundrive.com/v2/file/get_office_preview_url"
+	//case "video_preview":
+	//	url = "https://api.aliyundrive.com/v2/file/get_video_preview_play_info"
+	//	data["category"] = "live_transcoding"
+	//default:
+	//	return nil, errs.NotSupport
+	//}
+	//_, err := d.request(url, http.MethodPost, func(req *resty.Request) {
+	//	req.SetBody(data).SetResult(&resp)
+	//})
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return resp, nil
 }
 
 var _ driver.Driver = (*AliyundriveShare)(nil)
