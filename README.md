@@ -136,10 +136,15 @@ The `AList` is open-source software licensed under the AGPL-3.0 license.
 ---
 
 > [@Blog](https://nn.ci/) · [@GitHub](https://github.com/Xhofe) · [@TelegramGroup](https://t.me/alist_chat) · [@Discord](https://discord.gg/F4ymsH4xv2)
- docker编译运行
+ 
+
+docker编译运行
 > 
 > docker build --pull --rm -f "alist-dk/Dockerfile" -t alist-dk:latest "alist-dk"
 > 
-> docker run -d --restart=always -v /etc/alist:/opt/alist/data -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 --name="alist" xhofe/alist:latest
+> docker run -d --restart=always -v /etc/alist:/opt/alist/data -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 --name="alist" alist-dk:latest
+# 随机生成一个密码
+docker exec -it alist ./alist admin random
+# 手动设置一个密码,`NEW_PASSWORD`是指你需要设置的密码
+docker exec -it alist ./alist admin set NEW_PASSWORD
 
-> docker run -d --restart=always -v /etc/alist:/opt/alist/data -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 --name="alist" xhofe/alist:latest
