@@ -148,3 +148,25 @@ docker exec -it alist ./alist admin random
 # 手动设置一个密码,`NEW_PASSWORD`是指你需要设置的密码
 docker exec -it alist ./alist admin set NEW_PASSWORD
 
+推送镜像教程
+
+1.拉取镜像：
+# docker pull training/webapp
+Trying to pull repository docker.io/training/webapp
+
+2.查看镜像:
+# docker images training/webapp
+REPOSITORY                  TAG                 IMAGE ID            CREATED             SIZE
+docker.io/training/webapp   latest              6fae60ef3446        7 years ago         349 MB
+
+3.重新打镜像：
+# docker tag 6fae60ef3446 starb/webapp:v1.1
+
+4.查看新的标签：
+# docker images starb/webapp
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+newtag/webapp       v1.1                6fae60ef3446        7 years ago         349 MB
+5.推送
+# docker push starb/webapp:v1.1
+The push refers to a repository [docker.io/newtag/webapp]
+5f70bf18a086: Preparing
