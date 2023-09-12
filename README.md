@@ -142,7 +142,7 @@ liux编译运行
 go build -ldflags="--extldflags '-static -fpic'-w -s" -buildvcs=false .
 
 docker编译运行
-> 
+> 在vscode中安装docker 插件后 选中Dockerfile 会提示构建
 > docker build --pull --rm -f "alist-dk/Dockerfile" -t alist-dk:latest "alist-dk"
 > 
 > 如果多平台构建
