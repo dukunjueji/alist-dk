@@ -34,11 +34,11 @@ FetchWebDev() {
 }
 
 FetchWebRelease() {
-  curl -L https://jihulab.com/dukunjueji/CatVodSpider/-/raw/main/json/alist/dkdist.tar.gz -o dist.tar.gz
-  tar -zxvf dist.tar.gz
+  curl -L https://jihulab.com/dukunjueji/CatVodSpider/-/raw/main/json/alist/dist.zip -o dist.zip
+  tar -zxvf dist.zip
   rm -rf public/dist
   mv -f dist public
-  rm -rf dist.tar.gz
+  rm -rf dist.zip
 }
 
 BuildWinArm64() {

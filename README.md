@@ -145,6 +145,11 @@ docker编译运行
 > 
 > docker build --pull --rm -f "alist-dk/Dockerfile" -t alist-dk:latest "alist-dk"
 > 
+> 如果多平台构建
+创建 Buildx 构建上下文：
+ docker buildx create --use --name mybuilder --node mybuilder --driver-opt image=moby/buildkit:master
+ docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t alist-dk:v2.0 -f Dockerfile .
+> 
 > docker run -d --restart=always -v /etc/alist:/opt/alist/data -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 --name="alist" dukun/alist-dk
 # 随机生成一个密码
 docker exec -it alist ./alist admin random
