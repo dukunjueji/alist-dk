@@ -33,7 +33,7 @@ FetchWebRelease() {
   rm -rf dist.tar.gz
 }
 
-BuildWinArm64() {
+BuildWinArm64() { 
   echo building for windows-arm64
   chmod +x ./wrapper/zcc-arm64
   chmod +x ./wrapper/zcxx-arm64
