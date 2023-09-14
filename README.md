@@ -39,7 +39,7 @@
 
 ---
 
-English | [中文](./README_cn.md)| [日本語](./README_ja.md) | [Contributing](./CONTRIBUTING.md) | [CODE_OF_CONDUCT](./CODE_OF_CONDUCT.md)
+English | [中文](../../README_cn.md)| [日本語](../../README_ja.md) | [Contributing](../../CONTRIBUTING.md) | [CODE_OF_CONDUCT](../../CODE_OF_CONDUCT.md)
 
 ## Features
 
@@ -140,7 +140,8 @@ The `AList` is open-source software licensed under the AGPL-3.0 license.
 liux编译运行
 
 go build -ldflags="--extldflags '-static -fpic'-w -s" -buildvcs=false .
-
+docker 管理工具
+docker run -d -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
 docker编译运行
 > 在vscode中安装docker 插件后 选中Dockerfile 会提示构建
 > docker build --pull --rm -f "alist-dk/Dockerfile" -t alist-dk:latest "alist-dk"
@@ -150,7 +151,7 @@ docker编译运行
  docker buildx create --use --name mybuilder --node mybuilder --driver-opt image=moby/buildkit:master
  docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t alist-dk:v2.0 -f Dockerfile .
 > 
-> docker run -d --restart=always -v /etc/alist:/opt/alist/data -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 --name="alist" dukun/alist-dk
+> docker run -d --restart=always -v /etc/alist:/opt/alist/data -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 --name="alist" dukun/alist
 # 随机生成一个密码
 docker exec -it alist ./alist admin random
 # 手动设置一个密码,`NEW_PASSWORD`是指你需要设置的密码
