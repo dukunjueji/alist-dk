@@ -1,6 +1,10 @@
 package handles
 
 import (
+	"fmt"
+	json "github.com/json-iterator/go"
+	"io/ioutil"
+	"net/http"
 	"path"
 	"strings"
 
@@ -73,4 +77,51 @@ func nodeToSearchResp(node model.SearchNode) SearchResp {
 		SearchNode: node,
 		Type:       utils.GetObjType(node.Name, node.IsDir),
 	}
+}
+func HotSearch(c *gin.Context) {
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", "https://api.web.360kan.com/v1/rank?cat=3", nil)
+	if err != nil {
+		fmt.Println("创建请求时出错:", err)
+		return
+	}
+	// 添加自定义的请求头
+	req.Header.Add("Referer", "https://www.360kan.com/rank/general")
+
+	// 发送 HTTP 请求
+	resp, err := client.Do(req)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+
+	// 解析JSON数据
+	var tvShow TVShow
+	if err := json.Unmarshal(body, &tvShow); err != nil {
+		fmt.Println("解析JSON时出错:", err)
+		return
+	}
+
+	common.SuccessResp(c, tvShow)
+}
+
+type TVShow struct {
+	Data []struct {
+		Title       string   `json:"title"`
+		Comment     string   `json:"comment"`
+		UpInfo      string   `json:"upinfo"`
+		DoubanScore string   `json:"doubanscore"`
+		ID          int      `json:"id"`
+		Cat         int      `json:"cat"`
+		PV          string   `json:"pv"`
+		Cover       string   `json:"cover"`
+		URL         string   `json:"url"`
+		Percent     string   `json:"percent"`
+		EntID       string   `json:"ent_id"`
+		MovieCat    []string `json:"moviecat"`
+		VIP         bool     `json:"vip"`
+		Description string   `json:"description"`
+		PubDate     string   `json:"pubdate"`
+	} `json:"data"`
 }
