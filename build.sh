@@ -25,7 +25,7 @@ ldflags="\
 -X 'github.com/alist-org/alist/v3/internal/conf.WebVersion=$webVersion' \
 "
 FetchWebDev() {
-  curl -L https://jihulab.com/dukunjueji/CatVodSpider/-/raw/main/json/alist/dist.tar.gz -o dist.tar.gz
+  curl -L https://github.com/dukunjueji/alist-web-dk/releases/latest/download/dist.tar.gz -o dist.tar.gz
   tar -zxvf dist.tar.gz
   rm -rf public/dist
   mv -f dist public
