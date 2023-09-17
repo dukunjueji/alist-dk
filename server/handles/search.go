@@ -82,7 +82,7 @@ func HotSearch(c *gin.Context) {
 
 	client := &http.Client{}
 	keyword := c.Query("cat")
-	fmt.Println("创建请求时keyword:", keyword)
+	//fmt.Println("创建请求时keyword:", keyword)
 	req, err := http.NewRequest("GET", "https://api.web.360kan.com/v1/rank?cat="+keyword, nil)
 	if err != nil {
 		fmt.Println("创建请求时出错:", err)
