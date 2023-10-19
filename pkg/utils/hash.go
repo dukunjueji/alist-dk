@@ -184,6 +184,10 @@ type HashInfo struct {
 	h map[*HashType]string `json:"hashInfo"`
 }
 
+func NewHashInfoByMap(h map[*HashType]string) HashInfo {
+	return HashInfo{h}
+}
+
 func NewHashInfo(ht *HashType, str string) HashInfo {
 	m := make(map[*HashType]string)
 	if ht != nil {
@@ -217,4 +221,8 @@ func FromString(str string) HashInfo {
 }
 func (hi HashInfo) GetHash(ht *HashType) string {
 	return hi.h[ht]
+}
+
+func (hi HashInfo) Export() map[*HashType]string {
+	return hi.h
 }
