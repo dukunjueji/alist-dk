@@ -18,6 +18,7 @@ import (
 	"github.com/alist-org/alist/v3/internal/conf"
 	"github.com/alist-org/alist/v3/pkg/utils"
 	"github.com/alist-org/alist/v3/server"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -42,6 +43,8 @@ the address is defined in config file`,
 			gin.SetMode(gin.ReleaseMode)
 		}
 		r := gin.New()
+		// 使用 gzip 中间件对返回的数据进行压缩
+		r.Use(gzip.Gzip(gzip.DefaultCompression))
 		r.Use(gin.LoggerWithWriter(log.StandardLogger().Out), gin.RecoveryWithWriter(log.StandardLogger().Out))
 		server.Init(r)
 		var httpSrv, httpsSrv, unixSrv *http.Server
