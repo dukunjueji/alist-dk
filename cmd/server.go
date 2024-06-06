@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/alist-org/alist/v3/cmd/flags"
-	_ "github.com/alist-org/alist/v3/drivers"
 	"github.com/alist-org/alist/v3/internal/bootstrap"
 	"github.com/alist-org/alist/v3/internal/conf"
 	"github.com/alist-org/alist/v3/pkg/utils"
@@ -36,9 +36,9 @@ the address is defined in config file`,
 			utils.Log.Infof("delayed start for %d seconds", conf.Conf.DelayedStart)
 			time.Sleep(time.Duration(conf.Conf.DelayedStart) * time.Second)
 		}
-		bootstrap.InitAria2()
-		bootstrap.InitQbittorrent()
+		bootstrap.InitOfflineDownloadTools()
 		bootstrap.LoadStorages()
+		bootstrap.InitTaskManager()
 		if !flags.Debug && !flags.Dev {
 			gin.SetMode(gin.ReleaseMode)
 		}
@@ -54,7 +54,7 @@ the address is defined in config file`,
 			httpSrv = &http.Server{Addr: httpBase, Handler: r}
 			go func() {
 				err := httpSrv.ListenAndServe()
-				if err != nil && err != http.ErrServerClosed {
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
 					utils.Log.Fatalf("failed to start http: %s", err.Error())
 				}
 			}()
@@ -65,7 +65,7 @@ the address is defined in config file`,
 			httpsSrv = &http.Server{Addr: httpsBase, Handler: r}
 			go func() {
 				err := httpsSrv.ListenAndServeTLS(conf.Conf.Scheme.CertFile, conf.Conf.Scheme.KeyFile)
-				if err != nil && err != http.ErrServerClosed {
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
 					utils.Log.Fatalf("failed to start https: %s", err.Error())
 				}
 			}()
@@ -89,8 +89,29 @@ the address is defined in config file`,
 					}
 				}
 				err = unixSrv.Serve(listener)
-				if err != nil && err != http.ErrServerClosed {
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
 					utils.Log.Fatalf("failed to start unix: %s", err.Error())
+				}
+			}()
+		}
+		if conf.Conf.S3.Port != -1 && conf.Conf.S3.Enable {
+			s3r := gin.New()
+			s3r.Use(gin.LoggerWithWriter(log.StandardLogger().Out), gin.RecoveryWithWriter(log.StandardLogger().Out))
+			server.InitS3(s3r)
+			s3Base := fmt.Sprintf("%s:%d", conf.Conf.Scheme.Address, conf.Conf.S3.Port)
+			utils.Log.Infof("start S3 server @ %s", s3Base)
+			go func() {
+				var err error
+				if conf.Conf.S3.SSL {
+					httpsSrv = &http.Server{Addr: s3Base, Handler: s3r}
+					err = httpsSrv.ListenAndServeTLS(conf.Conf.Scheme.CertFile, conf.Conf.Scheme.KeyFile)
+				}
+				if !conf.Conf.S3.SSL {
+					httpSrv = &http.Server{Addr: s3Base, Handler: s3r}
+					err = httpSrv.ListenAndServe()
+				}
+				if err != nil && !errors.Is(err, http.ErrServerClosed) {
+					utils.Log.Fatalf("failed to start s3 server: %s", err.Error())
 				}
 			}()
 		}

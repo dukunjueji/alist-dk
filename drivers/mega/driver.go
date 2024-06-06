@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/alist-org/alist/v3/pkg/http_range"
-	"github.com/rclone/rclone/lib/readers"
 	"io"
 	"time"
+
+	"github.com/alist-org/alist/v3/pkg/http_range"
+	"github.com/pquerna/otp/totp"
+	"github.com/rclone/rclone/lib/readers"
 
 	"github.com/alist-org/alist/v3/internal/driver"
 	"github.com/alist-org/alist/v3/internal/errs"
@@ -32,8 +34,16 @@ func (d *Mega) GetAddition() driver.Additional {
 }
 
 func (d *Mega) Init(ctx context.Context) error {
+	var twoFACode = d.TwoFACode
 	d.c = mega.New()
-	return d.c.Login(d.Email, d.Password)
+	if d.TwoFASecret != "" {
+		code, err := totp.GenerateCode(d.TwoFASecret, time.Now())
+		if err != nil {
+			return fmt.Errorf("generate totp code failed: %w", err)
+		}
+		twoFACode = code
+	}
+	return d.c.MultiFactorLogin(d.Email, d.Password, twoFACode)
 }
 
 func (d *Mega) Drop(ctx context.Context) error {
@@ -169,7 +179,7 @@ func (d *Mega) Put(ctx context.Context, dstDir model.Obj, stream model.FileStrea
 			if err != nil {
 				return err
 			}
-			up(id * 100 / u.Chunks())
+			up(float64(id) * 100 / float64(u.Chunks()))
 		}
 
 		_, err = u.Finish()

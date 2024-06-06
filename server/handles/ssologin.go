@@ -231,7 +231,7 @@ func OIDCLoginCallback(c *gin.Context) {
 		common.ErrorResp(c, err, 400)
 		return
 	}
-	userID := utils.Json.Get(payload, conf.SSOOIDCUsernameKey).ToString()
+	userID := utils.Json.Get(payload, setting.GetStr(conf.SSOOIDCUsernameKey, "name")).ToString()
 	if userID == "" {
 		common.ErrorStrResp(c, "cannot get username from OIDC provider", 400)
 		return
@@ -260,7 +260,7 @@ func OIDCLoginCallback(c *gin.Context) {
 				common.ErrorResp(c, err, 400)
 			}
 		}
-		token, err := common.GenerateToken(user.Username)
+		token, err := common.GenerateToken(user)
 		if err != nil {
 			common.ErrorResp(c, err, 400)
 		}
@@ -398,7 +398,7 @@ func SSOLoginCallback(c *gin.Context) {
 	}
 	userID := utils.Json.Get(resp.Body(), idField).ToString()
 	if utils.SliceContains([]string{"", "0"}, userID) {
-		common.ErrorResp(c, errors.New("error occured"), 400)
+		common.ErrorResp(c, errors.New("error occurred"), 400)
 		return
 	}
 	if argument == "get_sso_id" {
@@ -426,7 +426,7 @@ func SSOLoginCallback(c *gin.Context) {
 			return
 		}
 	}
-	token, err := common.GenerateToken(user.Username)
+	token, err := common.GenerateToken(user)
 	if err != nil {
 		common.ErrorResp(c, err, 400)
 	}

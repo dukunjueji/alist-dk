@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://alist.nn.ci"><img height="100px" alt="logo" src="https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg"/></a>
+  <a href="https://alist.nn.ci"><img width="100px" alt="logo" src="https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg"/></a>
   <p><em>🗂️Gin と Solidjs による、複数のストレージをサポートするファイルリストプログラム。</em></p>
 <div>
   <a href="https://goreportcard.com/report/github.com/alist-org/alist/v3">
@@ -45,7 +45,7 @@
 
 - [x] マルチストレージ
     - [x] ローカルストレージ
-    - [x] [Aliyundrive](https://www.aliyundrive.com/)
+    - [x] [Aliyundrive](https://www.alipan.com/)
     - [x] OneDrive / Sharepoint ([グローバル](https://www.office.com/), [cn](https://portal.partner.microsoftonline.cn),de,us)
     - [x] [189cloud](https://cloud.189.cn) (Personal, Family)
     - [x] [GoogleDrive](https://drive.google.com/)
@@ -66,7 +66,8 @@
     - [x] [Quark](https://pan.quark.cn)
     - [x] [Thunder](https://pan.xunlei.com)
     - [x] [Lanzou](https://www.lanzou.com/)
-    - [x] [Aliyundrive share](https://www.aliyundrive.com/)
+    - [x] [ILanzou](https://www.ilanzou.com/)
+    - [x] [Aliyundrive share](https://www.alipan.com/)
     - [x] [Google photo](https://photos.google.com/)
     - [x] [Mega.nz](https://mega.nz)
     - [x] [Baidu photo](https://photo.baidu.com/)
@@ -74,6 +75,8 @@
     - [x] [115](https://115.com/)
     - [X] Cloudreve
     - [x] [Dropbox](https://www.dropbox.com/)
+    - [x] [FeijiPan](https://www.feijipan.com/)
+    - [x] [dogecloud](https://www.dogecloud.com/product/oss)
 - [x] デプロイが簡単で、すぐに使える
 - [x] ファイルプレビュー (PDF, マークダウン, コード, プレーンテキスト, ...)
 - [x] ギャラリーモードでの画像プレビュー
@@ -112,9 +115,9 @@ https://alist.nn.ci/guide/sponsor.html
 
 ### スペシャルスポンサー
 
-- [亚洲云 - 高防服务器|服务器租用|福州高防|广东电信|香港服务器|美国服务器|海外服务器 - 国内靠谱的企业级云计算服务提供商](https://www.asiayun.com/aff/QQCOOQKZ) (sponsored Chinese API server)
-- [找资源 - 阿里云盘资源搜索引擎](https://zhaoziyuan.pw/)
-- [JetBrains: Essential tools for software developers and teams](https://www.jetbrains.com/)
+- [VidHub](https://apps.apple.com/app/apple-store/id1659622164?pt=118612019&ct=alist&mt=8) - An elegant cloud video player within the Apple ecosystem. Support for iPhone, iPad, Mac, and Apple TV.
+- [亚洲云](https://www.asiayun.com/aff/QQCOOQKZ) - 高防服务器|服务器租用|福州高防|广东电信|香港服务器|美国服务器|海外服务器 - 国内靠谱的企业级云计算服务提供商 (sponsored Chinese API server)
+- [找资源](https://zhaoziyuan.pw/) - 阿里云盘资源搜索引擎
 
 ## コントリビューター
 

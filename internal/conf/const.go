@@ -41,6 +41,7 @@ const (
 	OcrApi                  = "ocr_api"
 	FilenameCharMapping     = "filename_char_mapping"
 	ForwardDirectLinkParams = "forward_direct_link_params"
+	IgnoreDirectLinkParams  = "ignore_direct_link_params"
 	WebauthnLoginEnabled    = "webauthn_login_enabled"
 
 	// index
@@ -71,6 +72,22 @@ const (
 	SSODefaultDir        = "sso_default_dir"
 	SSODefaultPermission = "sso_default_permission"
 	SSOCompatibilityMode = "sso_compatibility_mode"
+
+	//ldap
+	LdapLoginEnabled      = "ldap_login_enabled"
+	LdapServer            = "ldap_server"
+	LdapManagerDN         = "ldap_manager_dn"
+	LdapManagerPassword   = "ldap_manager_password"
+	LdapUserSearchBase    = "ldap_user_search_base"
+	LdapUserSearchFilter  = "ldap_user_search_filter"
+	LdapDefaultPermission = "ldap_default_permission"
+	LdapDefaultDir        = "ldap_default_dir"
+	LdapLoginTips         = "ldap_login_tips"
+
+	//s3
+	S3Buckets         = "s3_buckets"
+	S3AccessKeyId     = "s3_access_key_id"
+	S3SecretAccessKey = "s3_secret_access_key"
 
 	// qbittorrent
 	QbittorrentUrl      = "qbittorrent_url"

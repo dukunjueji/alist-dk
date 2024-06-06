@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"github.com/alist-org/alist/v3/pkg/utils"
 	"io"
 	"net/http"
 	"net/url"
@@ -81,6 +82,11 @@ func (c *Client) SetTimeout(timeout time.Duration) {
 // SetTransport exposes the ability to define custom transports
 func (c *Client) SetTransport(transport http.RoundTripper) {
 	c.c.Transport = transport
+}
+
+// SetJar exposes the ability to set a cookie jar to the client.
+func (c *Client) SetJar(jar http.CookieJar) {
+	c.c.Jar = jar
 }
 
 // Connect connects to our dav server
@@ -351,6 +357,11 @@ func (c *Client) Link(path string) (string, http.Header, error) {
 		return "", nil, newPathErrorErr("Link", path, err)
 	}
 
+	if c.c.Jar != nil {
+		for _, cookie := range c.c.Jar.Cookies(r.URL) {
+			r.AddCookie(cookie)
+		}
+	}
 	for k, vals := range c.headers {
 		for _, v := range vals {
 			r.Header.Add(k, v)
@@ -409,7 +420,7 @@ func (c *Client) ReadStreamRange(path string, offset, length int64) (io.ReadClos
 	// stream in rs.Body
 	if rs.StatusCode == 200 {
 		// discard first 'offset' bytes.
-		if _, err := io.Copy(io.Discard, io.LimitReader(rs.Body, offset)); err != nil {
+		if _, err := utils.CopyWithBuffer(io.Discard, io.LimitReader(rs.Body, offset)); err != nil {
 			return nil, newPathErrorErr("ReadStreamRange", path, err)
 		}
 

@@ -36,6 +36,7 @@ func Init(e *gin.Engine) {
 		g.Use(middlewares.MaxAllowed(conf.Conf.MaxConnections))
 	}
 	WebDav(g.Group("/dav"))
+	S3(g.Group("/s3"))
 
 	g.GET("/d/*path", middlewares.Down, handles.Down)
 	g.GET("/p/*path", middlewares.Down, handles.Proxy)
@@ -48,6 +49,7 @@ func Init(e *gin.Engine) {
 
 	api.POST("/auth/login", handles.Login)
 	api.POST("/auth/login/hash", handles.LoginHash)
+	api.POST("/auth/login/ldap", handles.LoginLdap)
 	auth.GET("/me", handles.CurrentUser)
 	auth.POST("/me/update", handles.UpdateCurrent)
 	auth.POST("/auth/2fa/generate", handles.Generate2FA)
@@ -70,7 +72,7 @@ func Init(e *gin.Engine) {
 	// no need auth
 	public := api.Group("/public")
 	public.Any("/settings", handles.PublicSettings)
-	public.Any("/hotSearch", handles.HotSearch)
+	public.Any("/offline_download_tools", handles.OfflineDownloadTools)
 
 	_fs(auth.Group("/fs"))
 	admin(auth.Group("/admin", middlewares.AuthAdmin))
@@ -156,14 +158,21 @@ func _fs(g *gin.RouterGroup) {
 	g.PUT("/put", middlewares.FsUp, handles.FsStream)
 	g.PUT("/form", middlewares.FsUp, handles.FsForm)
 	g.POST("/link", middlewares.AuthAdmin, handles.Link)
-	g.POST("/add_aria2", handles.AddAria2)
-	g.POST("/add_qbit", handles.AddQbittorrent)
+	//g.POST("/add_aria2", handles.AddOfflineDownload)
+	//g.POST("/add_qbit", handles.AddQbittorrent)
+	g.POST("/add_offline_download", handles.AddOfflineDownload)
 }
 
 func Cors(r *gin.Engine) {
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowHeaders = []string{"*"}
-	config.AllowMethods = []string{"*"}
+	//config.AllowAllOrigins = true
+	config.AllowOrigins = conf.Conf.Cors.AllowOrigins
+	config.AllowHeaders = conf.Conf.Cors.AllowHeaders
+	config.AllowMethods = conf.Conf.Cors.AllowMethods
 	r.Use(cors.New(config))
+}
+
+func InitS3(e *gin.Engine) {
+	Cors(e)
+	S3Server(e.Group("/"))
 }

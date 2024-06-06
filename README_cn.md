@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://alist.nn.ci"><img height="100px" alt="logo" src="https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg"/></a>
+  <a href="https://alist.nn.ci"><img width="100px" alt="logo" src="https://cdn.jsdelivr.net/gh/alist-org/logo@main/logo.svg"/></a>
   <p><em>🗂一个支持多存储的文件列表程序，使用 Gin 和 Solidjs。</em></p>
 <div>
   <a href="https://goreportcard.com/report/github.com/alist-org/alist/v3">
@@ -45,7 +45,7 @@
 
 - [x] 多种存储
     - [x] 本地存储
-    - [x] [阿里云盘](https://www.aliyundrive.com/)
+    - [x] [阿里云盘](https://www.alipan.com/)
     - [x] OneDrive / Sharepoint（[国际版](https://www.office.com/), [世纪互联](https://portal.partner.microsoftonline.cn),de,us）
     - [x] [天翼云盘](https://cloud.189.cn) (个人云, 家庭云)
     - [x] [GoogleDrive](https://drive.google.com/)
@@ -65,7 +65,8 @@
     - [x] [夸克网盘](https://pan.quark.cn)
     - [x] [迅雷网盘](https://pan.xunlei.com)
     - [x] [蓝奏云](https://www.lanzou.com/)
-    - [x] [阿里云盘分享](https://www.aliyundrive.com/)
+    - [x] [蓝奏云优享版](https://www.ilanzou.com/)
+    - [x] [阿里云盘分享](https://www.alipan.com/)
     - [x] [谷歌相册](https://photos.google.com/)
     - [x] [Mega.nz](https://mega.nz)
     - [x] [一刻相册](https://photo.baidu.com/)
@@ -73,6 +74,8 @@
     - [x] [115](https://115.com/)
     - [X] Cloudreve
     - [x] [Dropbox](https://www.dropbox.com/)
+    - [x] [飞机盘](https://www.feijipan.com/)
+    - [x] [多吉云](https://www.dogecloud.com/product/oss)
 - [x] 部署方便，开箱即用
 - [x] 文件预览（PDF、markdown、代码、纯文本……）
 - [x] 画廊模式下的图像预览
@@ -110,9 +113,9 @@ AList 是一个开源软件，如果你碰巧喜欢这个项目，并希望我�
 
 ### 特别赞助
 
-- [亚洲云 - 高防服务器|服务器租用|福州高防|广东电信|香港服务器|美国服务器|海外服务器 - 国内靠谱的企业级云计算服务提供商](https://www.asiayun.com/aff/QQCOOQKZ) (国内API服务器赞助)
-- [找资源 - 阿里云盘资源搜索引擎](https://zhaoziyuan.pw/)
-- [JetBrains: Essential tools for software developers and teams](https://www.jetbrains.com/)
+- [VidHub](https://apps.apple.com/app/apple-store/id1659622164?pt=118612019&ct=alist&mt=8) - 苹果生态下优雅的网盘视频播放器，iPhone，iPad，Mac，Apple TV全平台支持。
+- [亚洲云](https://www.asiayun.com/aff/QQCOOQKZ) - 高防服务器|服务器租用|福州高防|广东电信|香港服务器|美国服务器|海外服务器 - 国内靠谱的企业级云计算服务提供商 (国内API服务器赞助)
+- [找资源](https://zhaoziyuan.pw/) - 阿里云盘资源搜索引擎
 
 ## 贡献者
 

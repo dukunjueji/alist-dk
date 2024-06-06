@@ -18,9 +18,10 @@ type FileStream struct {
 	Ctx context.Context
 	model.Obj
 	io.Reader
-	Mimetype     string
-	WebPutAsTask bool
-	Exist        model.Obj //the file existed in the destination, we can reuse some info since we wil overwrite it
+	Mimetype          string
+	WebPutAsTask      bool
+	ForceStreamUpload bool
+	Exist             model.Obj //the file existed in the destination, we can reuse some info since we wil overwrite it
 	utils.Closers
 	tmpFile  *os.File //if present, tmpFile has full content, it will be deleted at last
 	peekBuff *bytes.Reader
@@ -43,6 +44,11 @@ func (f *FileStream) GetMimetype() string {
 func (f *FileStream) NeedStore() bool {
 	return f.WebPutAsTask
 }
+
+func (f *FileStream) IsForceStreamUpload() bool {
+	return f.ForceStreamUpload
+}
+
 func (f *FileStream) Close() error {
 	var err1, err2 error
 	err1 = f.Closers.Close()
@@ -98,7 +104,7 @@ func (f *FileStream) RangeRead(httpRange http_range.Range) (io.Reader, error) {
 		if httpRange.Start == 0 && httpRange.Length <= InMemoryBufMaxSizeBytes && f.peekBuff == nil {
 			bufSize := utils.Min(httpRange.Length, f.GetSize())
 			newBuf := bytes.NewBuffer(make([]byte, 0, bufSize))
-			n, err := io.CopyN(newBuf, f.Reader, bufSize)
+			n, err := utils.CopyWithBufferN(newBuf, f.Reader, bufSize)
 			if err != nil {
 				return nil, err
 			}
