@@ -2,8 +2,7 @@ name: release_docker
 
 on:
   push:
-    tags:
-      - '*'
+    branches: [ 'main' ]
 
 jobs:
   release_docker:
@@ -64,7 +63,7 @@ jobs:
         id: meta-ffmpeg
         uses: docker/metadata-action@v5
         with:
-          images: xhofe/alist
+          images: dukun/alist
           flavor: |
             latest=true
             suffix=-ffmpeg,onlatest=true
