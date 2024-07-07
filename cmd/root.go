@@ -19,6 +19,7 @@ Complete documentation is available at https://alist.nn.ci/`,
 }
 
 func Execute() {
+	OutAlistInit()
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
